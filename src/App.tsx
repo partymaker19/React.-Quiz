@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import './App.css';
+import logo from "./assets/Screenshot_2.png";
 const images = import.meta.glob('./assets/*.png', { eager: true });
 
 interface Question {
@@ -195,17 +196,34 @@ const App: React.FC = () => {
     return () => clearInterval(timerInterval);
   }, [timer, testStarted]);
 
-  const handleStartTest = () => {
-    if (selectedTopic === 'Устройство компьютера') {
-      setQuestions(pcQuestions);
-    } else if (selectedTopic === 'Пример теста') {
-      setQuestions(exampleQuestions);
-    }
+  // Функция для перемешивания массива
+const shuffleArray = (array: Question[]): Question[] => {
+  const shuffled = [...array]; // Создаем копию массива
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1)); // Случайный индекс
+    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]]; // Меняем местами элементы
+  }
+  return shuffled;
+};
+
+
+
+const handleStartTest = () => {
+  let selectedQuestions: Question[] = [];
+  if (selectedTopic === 'Устройство компьютера') {
+    selectedQuestions = pcQuestions;
+  } else if (selectedTopic === 'Пример теста') {
+    selectedQuestions = exampleQuestions;
+  }
+
+  const shuffledQuestions = shuffleArray(selectedQuestions);
+
+    setQuestions(shuffledQuestions);
     setTestStarted(true);
     setTestFinished(false);
     setCurrentQuestionIndex(0);
     setScore(0);
-    setTimer(20);
+    setTimer(15);
   };
 
   const handleSelectOption = (index: number) => {
@@ -217,7 +235,7 @@ const App: React.FC = () => {
       setScore((prev) => prev + 1);
     }
     setSelectedOption(null);
-    setTimer(20);
+    setTimer(15);
     if (currentQuestionIndex < questions.length - 1) {
       setCurrentQuestionIndex((prev) => prev + 1);
     } else {
@@ -234,7 +252,7 @@ const App: React.FC = () => {
 
   return (
     <div className="app">
-      <img className='img' width={200} height={120} src="./src/assets/Screenshot_2.png" alt="logo" />
+      <img className='img' width={200} height={120} src={logo} alt="logo" />
       <div className="sidebar" style={{ display: testStarted || testFinished ? 'none' : 'block' }}>
         <h2>Выбрать тест</h2>
         <div className="topic-buttons">
@@ -257,7 +275,7 @@ const App: React.FC = () => {
                     strokeWidth="5"
                     fill="none"
                     strokeDasharray={2 * Math.PI * 45}
-                    strokeDashoffset={(2 * Math.PI * 45 * (20 - timer)) / 20}
+                    strokeDashoffset={(2 * Math.PI * 45 * (15 - timer)) / 15}
                   />
                   <text
                     x="50%"
@@ -279,7 +297,7 @@ const App: React.FC = () => {
                 src={questions[currentQuestionIndex].image}
                 alt="Question related"
                 className="question-image"
-                width={400}
+                width={500}
                 height={300}
               />
             )}
@@ -313,7 +331,7 @@ const App: React.FC = () => {
         ) : testFinished ? (
           <div className="result">
             <h2>Тест пройден!</h2>
-            <p>Твой результат: {score} / {questions.length}</p>
+            <p>Твой результат: {score} правильный(х) ответа(ов) / из {questions.length} вопросов</p>
             <button className="restart-button" onClick={handleRestartTest}>
               Вернуться
             </button>
